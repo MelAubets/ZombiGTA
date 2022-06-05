@@ -8,7 +8,8 @@ public class PlayerHealth : MonoBehaviour
 {
     [Range(0f,100f)]
     public float health = 100f;
-    //public ProgressBar healthBar;
+    public ProgressBar healthBar;
+    public Animator animator;
 
     private void Start()
     {
@@ -20,10 +21,14 @@ public class PlayerHealth : MonoBehaviour
         SetHealth();
     }
 
+    private void FixedUpdate()
+    {
+        animator.SetBool("Hurted", false);
+    }
+
     public void TakeDamage(float damage)
     {
-        //ThirdPersonMovement anim = this.GetComponent<ThirdPersonMovement>();
-        //anim.animator.SetBool("IsHurted", true);
+        animator.SetBool("Hurted", true);
 
         health -= damage;
 
@@ -40,7 +45,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void SetHealth()
     {
-        //healthBar.BarValue = health;
+        healthBar.BarValue = health;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -48,11 +53,6 @@ public class PlayerHealth : MonoBehaviour
         if(other.tag == "Life")
         {
             health = 100f;
-            Destroy(other.gameObject);
-        }
-        if(other.tag == "Ammo")
-        {
-           // this.GetComponent<ThirdPersonMovement>().Reload();
             Destroy(other.gameObject);
         }
 

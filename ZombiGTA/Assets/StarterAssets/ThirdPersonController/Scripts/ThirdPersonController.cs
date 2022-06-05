@@ -79,20 +79,10 @@ namespace StarterAssets
         [Tooltip("Shooting distance range")]
         public float ShootRange = 30;
 
-        [Tooltip("Time required to reload")]
-        public float ReloadTime = 0.5f;
-
-        [Tooltip("Magazine size, max ammo")]
-        public int MagazineSize = 50;
-
         public AudioClip ShootSound;
-        public AudioClip ReloadSound;
 
         public ParticleSystem MuzzleFlash;
         public ParticleSystem ImpactEffect;
-
-        [Tooltip("Resting Ammo Canvas")]
-        public Text ammo;
 
         [Header("Cinemachine")]
         [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
@@ -121,10 +111,6 @@ namespace StarterAssets
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
-
-        // gun
-        private int _bulletsLeft;
-        private bool _reloading;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -189,9 +175,6 @@ namespace StarterAssets
 
             AssignAnimationIDs();
 
-            // reset ammonition
-            _bulletsLeft = MagazineSize;
-
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
@@ -204,6 +187,7 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
+            Shoot();
             Move();
         }
 
@@ -439,8 +423,13 @@ namespace StarterAssets
 
         private void Shoot()
         {
-            if (_input.shoot && _shootTimeoutDelta <= 0.0f &&_bulletsLeft < 0)
+            if (_input.shoot && _shootTimeoutDelta <= 0.0f)
             {
+                if (_hasAnimator)
+                {
+                    _animator.SetBool(_animIDShoot, true);
+                }
+
                 AudioSource.PlayClipAtPoint(ShootSound, FirePoint.position);
                 GameObject instanceMuz = Instantiate(MuzzleFlash, FirePoint.position, Quaternion.LookRotation(Gun.forward)).gameObject;
                 Destroy(instanceMuz, 0.1f);
@@ -448,37 +437,39 @@ namespace StarterAssets
                 int enemyMask = LayerMask.GetMask("Enemy");
                 Collider[] enemyInShootRadius = Physics.OverlapSphere(transform.position, ShootRange, enemyMask);
 
-                for (int i = 0; i < enemyInShootRadius.Length; i++)
+                if (enemyInShootRadius.Length > 0)
                 {
-                    Transform target = enemyInShootRadius[i].transform;
-                    Debug.Log(enemyInShootRadius[i].name);
+                    Transform target = enemyInShootRadius[0].transform;
+                    Debug.Log(enemyInShootRadius[0].name);
                     Vector3 dirToTarget = (target.position - transform.position).normalized;
-                    if (Vector3.Angle(transform.forward, dirToTarget) < 60f / 2)
+                    if (Vector3.Angle(transform.forward, dirToTarget) < 30f / 2)
                     {
-                        EnemyHealth enemy = enemyInShootRadius[i].GetComponentInParent<EnemyHealth>();
+                        EnemyHealth enemy = enemyInShootRadius[0].GetComponentInParent<EnemyHealth>();
+                        Debug.Log(Damage);
                         if (enemy != null)
                         {
                             enemy.TakeDamage(Damage);
                         }
-                        GameObject instance = Instantiate(ImpactEffect, enemyInShootRadius[i].transform.position, Quaternion.LookRotation(enemyInShootRadius[i].transform.forward)).gameObject;
+                        GameObject instance = Instantiate(ImpactEffect, enemyInShootRadius[0].transform.position, Quaternion.LookRotation(enemyInShootRadius[0].transform.forward)).gameObject;
                         Destroy(instance, 0.1f);
                     }
-
-
                 }
 
-                _bulletsLeft--;
+                _input.shoot = false;
+                _shootTimeoutDelta = ShootTimeout;
+            }
+            else
+            {
+                if (_hasAnimator)
+                {
+                    _animator.SetBool(_animIDShoot, false);
+                }
             }
 
             if (_shootTimeoutDelta >= 0.0f)
             {
                 _shootTimeoutDelta -= Time.deltaTime;
             }
-        }
-
-        private void Reload()
-        {
-
         }
     }
 }

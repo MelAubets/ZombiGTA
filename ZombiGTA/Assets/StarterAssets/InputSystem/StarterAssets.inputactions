@@ -226,7 +226,7 @@
                 {
                     "name": "",
                     "id": "f62cc554-8f77-483f-8c89-e6c0fd1c37fb",
-                    "path": "<Keyboard>/leftAlt",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",

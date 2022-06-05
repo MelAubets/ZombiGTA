@@ -16,7 +16,7 @@ public class EnemyAI : MonoBehaviour
     public float walkRadius;
 
     public NavMeshAgent agent;
-    public GameObject target;
+    //public GameObject target;
 
     public float range = 50f;
     public float damage = 2f;
@@ -64,9 +64,9 @@ public class EnemyAI : MonoBehaviour
                 {
                     Vector3 lastPosition = fow.visibleTargets[0].position;
                     agent.SetDestination(lastPosition);
-                    agent.speed = speed;
+                    agent.speed = speed*0.5f;
 
-                    if (Vector3.Distance(agent.transform.position, target.transform.position) <= 0.5f)
+                    if (Vector3.Distance(agent.transform.position, fow.visibleTargets[0].position) <= 0.5f)
                         state = State.Attack;
                 }
                 if (enHealth.health <= 0)
@@ -77,12 +77,12 @@ public class EnemyAI : MonoBehaviour
                 {
                     agent.SetDestination(agent.transform.position);
                     agent.speed = 0f;
-                    transform.LookAt(target.transform);
+                    transform.LookAt(fow.visibleTargets[0].position);
                     Attack();
                     float attackRate = 0.5f;
                     nextShootTime = Time.time + attackRate;
                 }
-                if (Vector3.Distance(agent.transform.position, target.transform.position) >= 0.6f)
+                if (Vector3.Distance(agent.transform.position, fow.visibleTargets[0].position) >= 0.6f)
                     state = State.Roaming;
                 if (!FindTarget())
                     state = State.Roaming;
@@ -121,7 +121,7 @@ public class EnemyAI : MonoBehaviour
     private void Attack()
     {
         animator.SetBool("isAttacking", true);
-        PlayerHealth player = target.GetComponent<PlayerHealth>();
+        PlayerHealth player = fow.visibleTargets[0].GetComponentInParent<PlayerHealth>();
         if (player != null)
             player.TakeDamage(damage);
     }
