@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityStandardAssets.Vehicles.Car;
+using UnityStandardAssets.Utility;
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 using UnityEngine.InputSystem;
 #endif
@@ -100,6 +102,14 @@ namespace StarterAssets
         [Tooltip("For locking the camera position on all axis")]
         public bool LockCameraPosition = false;
 
+        [Tooltip("Cinemachine Player Following Camera")]
+        public Cinemachine.CinemachineVirtualCamera PlayerFollowerCamera;
+        [Tooltip("Cinemachine Car Following Camera")]
+        public Cinemachine.CinemachineVirtualCamera CarFollowerCamera;
+
+        public GameObject Panel;
+        public Text text;
+
         // cinemachine
         private float _cinemachineTargetYaw;
         private float _cinemachineTargetPitch;
@@ -111,6 +121,10 @@ namespace StarterAssets
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
+
+        // car
+        private Collider car;
+        private bool _canSteal = false;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -153,6 +167,7 @@ namespace StarterAssets
 
         private void Awake()
         {
+            text.text = "Press Q to steal";
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -172,6 +187,7 @@ namespace StarterAssets
 #else
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
+            Panel.SetActive(false);
 
             AssignAnimationIDs();
 
@@ -183,11 +199,18 @@ namespace StarterAssets
 
         private void Update()
         {
+            text.text = "Press Q to steal";
             _hasAnimator = TryGetComponent(out _animator);
+
+            if (_canSteal)
+                Panel.SetActive(true);
+            else
+                Panel.SetActive(false);
 
             JumpAndGravity();
             GroundedCheck();
             Shoot();
+            Steal();
             Move();
         }
 
@@ -442,7 +465,7 @@ namespace StarterAssets
                     Transform target = enemyInShootRadius[0].transform;
                     Debug.Log(enemyInShootRadius[0].name);
                     Vector3 dirToTarget = (target.position - transform.position).normalized;
-                    if (Vector3.Angle(transform.forward, dirToTarget) < 30f / 2)
+                    if (Vector3.Angle(transform.forward, dirToTarget) < 60f / 2)
                     {
                         EnemyHealth enemy = enemyInShootRadius[0].GetComponentInParent<EnemyHealth>();
                         Debug.Log(Damage);
@@ -470,6 +493,53 @@ namespace StarterAssets
             {
                 _shootTimeoutDelta -= Time.deltaTime;
             }
+        }
+
+        private void Steal()
+        {
+            if(_canSteal && _input.steal)
+            {
+                _canSteal = false;
+                CarAIControl carAI = car.GetComponent<CarAIControl>();
+                WaypointProgressTracker waypoint = car.GetComponent<WaypointProgressTracker>();
+                CarUserControl carUser = car.GetComponent<CarUserControl>();
+                CarAudio carAudio = car.GetComponent<CarAudio>();
+
+                this.gameObject.transform.parent = car.transform;
+                text.text = "Press E to exit";
+                this.gameObject.SetActive(false);
+                carUser.enabled = true;
+                carAudio.enabled = true;
+                carAI.enabled = false;
+                waypoint.enabled = false;
+                CarFollowerCamera.LookAt = car.transform;
+                CarFollowerCamera.Follow = car.transform;
+                CarFollowerCamera.enabled = true;
+                PlayerFollowerCamera.enabled = false;
+            }
+            if (_input.steal)
+            {
+                _input.steal = false;
+            }
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if(other.tag == "Car")
+            {
+                _canSteal = true;
+                Debug.Log(_canSteal);
+                car = other;
+               
+            }
+                
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.tag == "Car")
+                _canSteal = false;
+            Debug.Log(_canSteal);
         }
     }
 }

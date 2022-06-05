@@ -39,28 +39,12 @@ public class PlayerHealth : MonoBehaviour
 
     public void Dead()
     {
-        PlayerPrefs.SetInt("win", 0);
         SceneManager.LoadScene(2);
     }
 
     public void SetHealth()
     {
         healthBar.BarValue = health;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.tag == "Life")
-        {
-            health = 100f;
-            Destroy(other.gameObject);
-        }
-
-        if(other.tag == "EndGameWin")
-        {
-            PlayerPrefs.SetInt("win", 1);
-            SceneManager.LoadScene(2);
-        }
     }
 
 }

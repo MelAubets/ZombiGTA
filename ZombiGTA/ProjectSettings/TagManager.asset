@@ -9,6 +9,9 @@ TagManager:
   - Fire
   - Life
   - Ammo
+  - Car
+  - Dissapear
+  - Peasant
   layers:
   - Default
   - TransparentFX
@@ -19,8 +22,8 @@ TagManager:
   - Player
   - Ground
   - Enemy
-  - 
-  - 
+  - Car
+  - Peasant
   - 
   - 
   - 

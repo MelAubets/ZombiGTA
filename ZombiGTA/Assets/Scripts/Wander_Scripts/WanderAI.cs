@@ -68,7 +68,7 @@ public class WanderAI : MonoBehaviour
                         Vector3 dirToTarget = agent.transform.position - fow.visibleTargets[0].position;
                         Vector3 newPos = agent.transform.position + dirToTarget;
                         agent.SetDestination(newPos);
-                        agent.speed = speed * 5;
+                        agent.speed = speed * 2.5f;
                         _animationBlend = Mathf.Lerp(_animationBlend, agent.speed, Time.deltaTime * SpeedChangeRate);
                     }
                     else
