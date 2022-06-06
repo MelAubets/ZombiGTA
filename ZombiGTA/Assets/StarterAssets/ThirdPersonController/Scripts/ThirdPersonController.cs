@@ -462,18 +462,18 @@ namespace StarterAssets
 
                 if (enemyInShootRadius.Length > 0)
                 {
-                    Transform target = enemyInShootRadius[0].transform;
-                    Debug.Log(enemyInShootRadius[0].name);
+                    Transform target = enemyInShootRadius[enemyInShootRadius.Length - 1].transform;
+                    Debug.Log(enemyInShootRadius[enemyInShootRadius.Length - 1].name);
                     Vector3 dirToTarget = (target.position - transform.position).normalized;
                     if (Vector3.Angle(transform.forward, dirToTarget) < 60f / 2)
                     {
-                        EnemyHealth enemy = enemyInShootRadius[0].GetComponentInParent<EnemyHealth>();
+                        EnemyHealth enemy = enemyInShootRadius[enemyInShootRadius.Length - 1].GetComponentInParent<EnemyHealth>();
                         Debug.Log(Damage);
                         if (enemy != null)
                         {
                             enemy.TakeDamage(Damage);
                         }
-                        GameObject instance = Instantiate(ImpactEffect, enemyInShootRadius[0].transform.position, Quaternion.LookRotation(enemyInShootRadius[0].transform.forward)).gameObject;
+                        GameObject instance = Instantiate(ImpactEffect, enemyInShootRadius[enemyInShootRadius.Length - 1].transform.position, Quaternion.LookRotation(enemyInShootRadius[enemyInShootRadius.Length - 1].transform.forward)).gameObject;
                         Destroy(instance, 0.1f);
                     }
                 }
